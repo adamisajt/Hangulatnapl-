@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hangulatnaplo</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="index.html">Hangulatnapló</a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNavigation"
+          aria-controls="mainNavigation"
+          aria-expanded="false"
+          aria-label="Navigáció megnyitása"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavigation">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Új bejegyzés</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="admin.html">Bejegyzések</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="statisztikak.html">Statisztikák</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-5">
+      <section class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+              <p class="text-primary fw-bold small text-uppercase mb-2">Kezelés</p>
+              <h1 class="h2 mb-2">Bejegyzések</h1>
+              <p class="text-secondary mb-0">Itt módosíthatod és törölheted a mentett bejegyzéseket.</p>
+            </div>
+            <a href="index.html" class="btn btn-primary">+ Új bejegyzés</a>
+          </div>
+
+          <div id="message" aria-live="polite"></div>
+
+          <div class="table-responsive border rounded-3">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Dátum</th>
+                  <th>Hangulat</th>
+                  <th>Leírás</th>
+                  <th class="text-end">MŰveletek</th>
+                </tr>
+              </thead>
+              <tbody id="entriesBody">
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-secondary">Bejegyzések betöltése…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <form id="editForm" novalidate>
+            <div class="modal-header bg-light">
+              <h2 class="modal-title fs-5" id="editModalLabel">Bejegyzés módosítása</h2>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bezárás"></button>
+            </div>
+
+            <div class="modal-body">
+              <input id="editId" type="hidden" />
+
+              <div class="mb-3">
+                <label for="editDate" class="form-label fw-semibold">Dátum</label>
+                <input id="editDate" class="form-control" type="text" readonly />
+              </div>
+
+              <div class="mb-3">
+                <label for="editMood" class="form-label fw-semibold">Hangulat</label>
+                <input id="editMood" class="form-control" type="text" readonly />
+                <div class="form-text">A hangulat az API-ban már rögzítve van, ezért itt csak megjelenik.</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="editDescription" class="form-label fw-semibold">Szöveges leírás</label>
+                <textarea id="editDescription" class="form-control" rows="5" maxlength="500" required></textarea>
+              </div>
+
+              <div id="modalUzenet" aria-live="polite"></div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Mégse</button>
+              <button id="updateButton" type="submit" class="btn btn-primary">Módosítás mentése</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-danger text-white">
+            <h2 class="modal-title fs-5" id="deleteModalLabel">Bejegyzés törlése</h2>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Bezárás"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">Biztosan törölni szeretnéd ezt a bejegyzést?</p>
+            <input id="deleteId" type="hidden" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Mégse</button>
+            <button id="confirmDeleteButton" type="button" class="btn btn-danger">Igen, törlés</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="/src/admin.ts"></script>
+  </body>
+</html>
